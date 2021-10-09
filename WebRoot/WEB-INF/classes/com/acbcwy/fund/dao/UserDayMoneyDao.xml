@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.acbcwy.fund.dao.UserDayMoneyDao"> 
+	<select id="findUserDayMoney" parameterType="com.acbcwy.fund.model.UserDayMoney" resultType="com.acbcwy.fund.model.UserDayMoney"> 
+		select  user_id as userId,
+				account_day as accountDay ,
+				total_money as totalMoney ,
+				createdby ,
+				create_time as createTime,
+				last_updatedby as lastUpdatedBy,
+				last_update_time as lastUpdatedTime
+		  from user_day_money  
+		 where 1=1
+		    <if test="userId !=null">
+			   and user_id=#{userId}
+		    </if>	
+		    <if test="accountDay !=null">
+			   and account_day=#{accountDay}
+		    </if>	
+		    <if test="totalMoney !=null">
+			   and total_money=#{totalMoney}
+		    </if>			    		    		    
+	</select> 
+	
+	<insert id="addUserDayMoney" parameterType="com.acbcwy.fund.model.UserDayMoney" flushCache="true"> 
+			INSERT INTO user_day_money(
+			                user_id  ,
+				            account_day   ,
+				            total_money ,
+							createdby ,
+							create_time ,
+							last_updatedby,
+							last_update_time 
+						    ) 
+ 			     VALUES (#{userId},
+						 #{accountDay},
+						 #{totalMoney},
+						 #{createdBy},
+						 CURRENT_TIMESTAMP(),
+						 #{lastUpdatedBy},
+						 CURRENT_TIMESTAMP()
+						 ) 
+	</insert> 
+	<update id="updateUserDayMoney" parameterType="com.acbcwy.fund.model.UserDayMoney">
+			UPDATE user_day_money 
+		       <set> 
+					 <if test="totalMoney !=null"> total_money=#{totalMoney} ,</if>
+					 <if test="createdBy !=null"> 
+					     createdby=#{createdBy} ,
+					     create_time=CURRENT_TIMESTAMP(),
+					 </if>
+					 <if test="lastUpdatedBy !=null"> 
+					 	 last_updatedby=#{lastUpdatedBy} ,
+					 	 last_update_time=CURRENT_TIMESTAMP() ,
+					 </if>
+			    </set>
+	 		WHERE user_id=#{userId}	
+	 		  AND account_day=#{accountDay}	
+	</update>
+	
+	<update id="updateUserDayMoneyByInvestData" parameterType="com.acbcwy.fund.model.InvestData">
+			UPDATE user_day_money 
+		       set total_money=total_money+(#{investAmount} * #{investDirection})
+	 		WHERE user_id=#{userId}	
+	 		  AND account_day=#{investDate}	
+	</update>
+	
+	<delete id="deleteUserDayMoney" parameterType="com.acbcwy.fund.model.UserDayMoney">
+		DELETE FROM user_day_money 
+		  WHERE 1=1 
+		  <if test="userId !=null"> 
+			and	user_id=#{userId}
+		  </if>
+		  and  account_day=#{accountDay}
+		   
+	</delete>
+	
+	<update id="computeUserDayMoney" parameterType="com.acbcwy.fund.model.UserDayMoney">
+ 	  	 insert into user_day_money(user_id,account_day,total_money,createdby,create_time,last_updatedby,last_update_time) 					 
+		select X.user_id, 
+			   #{accountDay} as account_day,
+			   case when IFNULL(z.dayTotalMoney,0) &gt; 0 then IFNULL(Y.today_money, IFNULL(w.usrmoney ,0) * #{yieldRate} ) + z.dayTotalMoney
+                    when IFNULL(z.dayTotalMoney,0) &lt; 0  then z.dayTotalMoney * #{yieldRate}+ IFNULL(Y.today_money,0)
+                    else IFNULL(Y.today_money , (IFNULL(w.usrmoney,0) + IFNULL(z.dayTotalMoney,0)) * #{yieldRate} )
+               end as  total_money,
+			   #{createdBy} as createdBy,
+			   CURRENT_TIMESTAMP() as create_time,
+			   #{lastUpdatedBy} as last_updatedby,
+			   CURRENT_TIMESTAMP() as last_update_time
+		  from (select user_id
+		          from user
+				 where user_type !=0
+				) X
+		left join (select user_id,
+					            total_money * #{yieldRate} as today_money
+				  from user_day_money
+				 where account_day=(select max(account_day) 
+									  from user_day_money
+									 where account_day &lt; #{accountDay})
+		        ) y on(X.user_id=Y.user_id)
+		left join (select user_id,   
+						  sum(invest_amount*invest_direction) as dayTotalMoney
+					 from invest_data
+					where invest_date=#{accountDay} 
+					group by user_id 
+		           ) z	on(X.user_id=Z.user_id)	
+	    left join ( select user_id,IFNULL(sum(invest_amount*invest_direction),0) as usrmoney    
+					  from invest_data 
+				     where invest_date &lt; #{accountDay}
+				   group by user_id ) W on(x.user_id=W.user_id)
+
+	</update>
+	
+	<select id="findUserSummary"  parameterType="java.lang.Long" resultType="com.acbcwy.fund.model.UserSummary">
+		select M.*,
+		       N.user_id as userId,
+			   N.totalInvest
+		  from (
+					select X.user_id,
+						   Z.user_name as userName,
+						   Z.id_card_no as idCardNo,
+						   Z.phone,
+						   Z.email,
+						   Z.user_type as userType,
+						   X.total_money as totalMoney,
+						   Y.yield_rate as todayYieldRate
+					  from user_day_money X
+					  left join fund_income Y on (X.account_day=Y.account_day) 
+					  left join user Z on(X.user_id = Z.user_id)
+					 where X.user_id = #{userId}
+					   and X.account_day=(select max(account_day) 
+										  from user_day_money
+										 where user_id = #{userId} )
+			   ) M
+		left join (
+					select user_id,
+						   sum(invest_amount* invest_direction) as totalInvest
+					  from invest_data 
+					 where user_id = #{userId}
+					 group by user_id
+					 
+				  ) N on(M.user_id = N.user_id )  	 
+	</select>
+	
+</mapper>  

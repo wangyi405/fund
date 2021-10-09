@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>登录界面</title>
+    <script>
+		 var system ={};  
+		 var p = navigator.platform;       
+		 system.win = p.indexOf("Win") == 0;  
+		 system.mac = p.indexOf("Mac") == 0;  
+		 system.x11 = (p == "X11") || (p.indexOf("Linux") == 0);     
+		 if(system.win||system.mac||system.xll){
+		   	window.location.href="./computer/login.jsp"; 
+		 }else{
+		    window.location.href="./phone/login.jsp";    
+		}   
+    </script>
+</head>
+
+
+<body>
+
+</body>

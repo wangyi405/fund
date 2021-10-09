@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">  
+<configuration>
+    <mappers>
+		<mapper resource="com/acbcwy/fund/dao/UserDao.xml"/>
+		<mapper resource="com/acbcwy/fund/dao/FundInfoDao.xml"/>
+		<mapper resource="com/acbcwy/fund/dao/FundIncomeDao.xml"/>
+		<mapper resource="com/acbcwy/fund/dao/InvestDataDao.xml"/>
+		<mapper resource="com/acbcwy/fund/dao/SystemLogDao.xml"/>
+		<mapper resource="com/acbcwy/fund/dao/UserDayMoneyDao.xml"/>
+	</mappers>
+	
+ 
+    
+</configuration>

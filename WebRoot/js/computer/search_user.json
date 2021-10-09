@@ -1,0 +1,34 @@
+﻿{
+    "rows": [
+        {
+            "createTime": "Sun Jan 01 16:20:26 CST 2017",
+            "createdBy": 0,
+            "createdByName": "null",
+            "email": "abc@qq.com",
+            "idCardNo": "123456789012345678",
+            "lastUpdateTime": "Sun Jan 01 16:20:26 CST 2017",
+            "lastUpdatedBy": 0,
+            "lastUpdatedByName": "null",
+            "phone": "13612345678",
+            "userId": 1,
+            "userName": "Admin",
+            "userType": 0,
+            "userTypeName": "系统用户"
+        },{
+            "createTime": "Sun Jan 01 16:20:26 CST 2017",
+            "createdBy": 0,
+            "createdByName": "null",
+            "email": "abc@qq.com",
+            "idCardNo": "123456789012345678",
+            "lastUpdateTime": "Sun Jan 01 16:20:26 CST 2017",
+            "lastUpdatedBy": 0,
+            "lastUpdatedByName": "null",
+            "phone": "13612345678",
+            "userId": 2,
+            "userName": "Admin",
+            "userType": 0,
+            "userTypeName": "系统用户"
+        }
+    ],
+    "total": 2
+}

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.acbcwy.fund.dao.FundIncomeDao"> 
+	<select id="findFundIncome" parameterType="com.acbcwy.fund.model.FundIncome" resultType="com.acbcwy.fund.model.FundIncome"> 
+		select  X.fund_id as fundId, 
+				X.account_day as accountDay,
+				X.today_book_value as todayBookValue,
+				X.yield_rate as yieldRate ,
+				X.createdby ,
+				X.create_time as createTime,
+				X.last_updatedby as lastUpdatedBy,
+				X.last_update_time as lastUpdateTime,
+				Y.fund_name as fundName,
+				Y.abbr_name as abbrName,
+				M.user_name as createdByName,
+				N.user_name as lastUpdatedByName,
+	            O.buyTotalValue,
+	            O.saleTotalValue
+		  from fund_income X 
+		  left join fund_info Y on(X.fund_id=Y.fund_id)
+		  left join User M on(X.createdBy=M.user_Id)
+		  left join User N on(X.last_updatedby=N.user_Id)
+	          left join (select invest_date as account_day ,
+							    sum(IF(invest_direction = 1 ,invest_amount, 0)) as buyTotalValue,
+							    sum(IF(invest_direction = 1 ,0, invest_amount)) as saleTotalValue
+						 from invest_data 
+						where 1=1
+						  <if test="beginDate !=null">
+						      and invest_date  &gt;= #{beginDate}
+						  </if>
+						  <if test="endDate !=null">
+						      and invest_date &lt;= #{endDate}
+						  </if>
+						group by  invest_date ) O on(X.account_day = O.account_day)	
+		 where 1=1
+		    <if test="fundId !=null">
+			   and X.fund_id=#{fundId}
+		    </if>	
+		    <if test="accountDay !=null">
+			   and X.account_day = #{accountDay}
+		    </if>	
+		    <if test="beginDate !=null">
+			   and X.account_day &gt;= #{beginDate}
+		    </if>	
+		    <if test="endDate !=null">
+			   and X.account_day &lt;= #{endDate}
+		    </if>	
+		 order by accountDay asc ;   
+	</select> 
+	
+	<select id="findMaxDate" parameterType="com.acbcwy.fund.model.FundIncome" resultType="java.lang.String">
+		select DATE_FORMAT(max(X.account_day),'%Y-%m-%d') as accountDay
+		  from fund_income X 
+		where 1=1
+	    <if test="fundId !=null">
+		   and X.fund_id=#{fundId}
+	    </if>
+	</select>
+	
+	<insert id="addFundIncome" parameterType="com.acbcwy.fund.model.FundIncome" flushCache="true"> 
+		INSERT INTO fund_income(
+		                 fund_id,
+						 account_day ,
+						 today_book_value,
+			             yield_rate ,
+						 createdby,
+						 create_time,
+						 last_updatedby,
+						 last_update_time
+					    ) 
+			     VALUES (#{fundId},
+					 #{accountDay},
+					 #{todayBookValue},
+					 #{yieldRate},
+					 #{createdBy},
+					 CURRENT_TIMESTAMP(),
+					 #{lastUpdatedBy},
+					 CURRENT_TIMESTAMP()
+					 ) 
+	</insert> 
+	<update id="updateFundIncome" parameterType="com.acbcwy.fund.model.FundIncome">
+			UPDATE fund_income 
+		       <set> 
+					 <if test="todayBookValue !=null">today_book_value=#{todayBookValue} ,</if>
+					 <if test="yieldRate !=null"> yield_rate=#{yieldRate} ,</if>
+					 <if test="lastUpdatedBy !=null"> 
+					 	 last_updatedby=#{lastUpdatedBy} ,
+					 	 last_update_time=CURRENT_TIMESTAMP() ,
+					 </if>
+			    </set>
+	 		WHERE fund_id=#{fundId}	and account_day=#{accountDay}
+	</update>
+	<delete id="deleteFundIncome" parameterType="com.acbcwy.fund.model.FundIncome">
+		DELETE FROM fund_income WHERE fund_id=#{fundId} and account_day=#{accountDay}
+	</delete>
+	
+	<select id="findBuySaleTotalValueCurrDay" parameterType="com.acbcwy.fund.model.FundIncome" resultType="com.acbcwy.fund.model.FundIncome">
+		select  sum(IF(invest_direction=1,invest_amount,0)) as buyTotalValue, 
+				sum(IF(invest_direction!=1,invest_amount,0)) as saleTotalValue 
+		 from  Invest_Data Y
+		where  Y.invest_date = #{accountDay}
+    </select>
+    
+    <select id="findBuySaleTotalValueLessThanDay" parameterType="com.acbcwy.fund.model.FundIncome" resultType="com.acbcwy.fund.model.FundIncome">
+		select  sum(IF(invest_direction=1,invest_amount,0)) as buyTotalValue, 
+				sum(IF(invest_direction!=1,invest_amount,0)) as saleTotalValue 
+		 from  Invest_Data Y
+		where  Y.invest_date &lt; #{accountDay}
+    </select>
+    
+    <select id="findBuySaleTotalValueLastTwoDay" parameterType="com.acbcwy.fund.model.FundIncome" resultType="com.acbcwy.fund.model.FundIncome">
+	    select Y.invest_date as accountDay ,
+		       sum(IF(invest_direction=1,invest_amount,0)) as buyTotalValue, 
+		       sum(IF(invest_direction!=1,invest_amount,0)) as saleTotalValue 
+	     from Invest_Data Y 
+	     where Y.invest_date &lt;= #{accountDay}
+	     group by Y.invest_date
+		 order by Y.invest_date desc
+	     limit 0,2
+    </select>
+</mapper>  

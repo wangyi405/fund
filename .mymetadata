@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="fund"
+  id="myeclipse.1483146383179"
+  context-root="/fund"
+  j2ee-spec="6.0"
+  archive="fund.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

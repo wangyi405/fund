@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.acbcwy.fund.dao.InvestDataDao"> 
+	<select id="findInvestData" parameterType="com.acbcwy.fund.model.InvestData" resultType="com.acbcwy.fund.model.InvestData"> 
+		select  X.invest_id as investId, 
+				X.user_id as userId,
+				X.invest_date as investDate ,
+				X.invest_amount as investAmount ,
+				X.invest_direction as investDirection ,
+				X.createdby ,
+				X.create_time as createTime,
+				X.last_updatedby as lastUpdatedBy,
+				X.last_update_time as lastUpdatedTime,
+				Y.user_name as userName,
+				z.user_name as createdByName
+		  from invest_data X
+		  left join user Y on(X.user_id=Y.user_id)
+		  left join user Z on(X.createdby=Z.user_id)
+		 where 1=1
+		    <if test="investId !=null">
+			   and X.invest_id=#{investId}
+		    </if>	
+		    <if test="userId !=null">
+			   and X.user_id=#{userId}
+		    </if>	
+		    <if test="investDate !=null">
+			   and X.invest_date=#{investDate}
+		    </if>	
+		    <if test="investAmount !=null">
+			   and X.invest_amount=#{investAmount}
+		    </if>	
+		    <if test="investDirection !=null">
+			   and X.invest_direction=#{investDirection}
+		    </if>			    	
+		 order by X.user_id , X.invest_date  	    		    
+	</select> 
+	
+	<select id="findSummaryByDay" parameterType="com.acbcwy.fund.model.FundIncome" resultType="com.acbcwy.fund.model.FundIncome"> 
+			select M.invest_date as accountDay,
+				   sum(IF(invest_direction=1,invest_amount,0)) as buyTotalValue, 
+				   sum(IF(invest_direction=1,0,invest_amount)) as saleTotalValue 
+			 from Invest_Data M
+			where M.invest_date= #{accountDay}
+			 group by M.invest_date    
+	</select> 
+	
+	<insert id="addInvestData" parameterType="com.acbcwy.fund.model.InvestData" flushCache="true"> 
+			INSERT INTO invest_data(
+			                user_id ,
+							invest_date ,
+							invest_amount  ,
+							invest_direction ,
+							createdby ,
+							create_time ,
+							last_updatedby,
+							last_update_time 
+						    ) 
+ 			     VALUES (#{userId},
+						 #{investDate},
+						 #{investAmount},
+						 #{investDirection},
+						 #{createdBy},
+						 CURRENT_TIMESTAMP(),
+						 #{lastUpdatedBy},
+						 CURRENT_TIMESTAMP()
+						 ) 
+	</insert> 
+	<update id="updateInvestData" parameterType="com.acbcwy.fund.model.InvestData">
+			UPDATE invest_data 
+		       <set> 
+		             <if test="userId !=null"> user_id=#{userId} ,</if>
+					 <if test="investDate !=null"> invest_date=#{investDate} ,</if>
+					 <if test="investAmount !=null"> invest_amount=#{investAmount} ,</if>
+					 <if test="investDirection !=null"> invest_direction=#{investDirection} ,</if>
+					 <if test="createdBy !=null"> 
+					     createdby=#{createdBy} ,
+					     create_time=CURRENT_TIMESTAMP(),
+					 </if>
+					 <if test="lastUpdatedBy !=null"> 
+					 	 last_updatedby=#{lastUpdatedBy} ,
+					 	 last_update_time=CURRENT_TIMESTAMP() ,
+					 </if>
+			    </set>
+	 		WHERE invest_id=#{investId}	
+	</update>
+	<delete id="deleteInvestData" parameterType="com.acbcwy.fund.model.InvestData">
+		DELETE FROM invest_data WHERE invest_id=#{investId}
+	</delete>
+	
+	
+</mapper>  

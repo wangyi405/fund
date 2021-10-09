@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.acbcwy.fund.dao.FundInfoDao"> 
+	<select id="findFundInfo" parameterType="com.acbcwy.fund.model.FundInfo" resultType="com.acbcwy.fund.model.FundInfo"> 
+		select  fund_id as fundId, 
+				fund_name as fundName,
+				abbr_name as abbrName,
+				manager ,
+				recommend ,
+				createdby ,
+				create_time as createTime,
+				last_updatedby as lastUpdatedBy,
+				last_update_time as lastUpdatedTime
+		  from fund_info  
+		 where 1=1
+		    <if test="fundId !=null">
+			   and fund_id=#{fundId}
+		    </if>	
+		    <if test="fundName !=null">
+			   and fund_name=#{fundName}
+		    </if>	
+		    <if test="manager !=null">
+			   and manager=#{manager}
+		    </if>	
+	</select> 
+	
+	<insert id="addFundInfo" parameterType="com.acbcwy.fund.model.FundInfo" flushCache="true"> 
+			INSERT INTO fund_info(
+			                 fund_name,
+			                 abbr_name,
+							 manager ,
+				             recommend ,
+							 createdby,
+							 create_time,
+							 last_updatedby,
+							 last_update_time
+						    ) 
+ 			     VALUES (#{fundName},
+ 			             #{abbrName},
+						 #{manager},
+						 #{recommend},
+						 #{createdBy},
+						 CURRENT_TIMESTAMP(),
+						 #{lastUpdatedBy},
+						 CURRENT_TIMESTAMP()
+						 ) 
+	</insert> 
+	<update id="updateFundInfo" parameterType="com.acbcwy.fund.model.FundInfo">
+			UPDATE Fund_Info 
+		       <set> 
+		             <if test="fundName !=null"> fund_name=#{fundName} ,</if>
+		             <if test="abbrName !=null"> abbr_name=#{abbrName} ,</if>
+					 <if test="manager !=null"> manager=#{manager} ,</if>
+					 <if test="recommend !=null"> recommend=#{recommend} ,</if>
+					 <if test="createdBy !=null"> 
+					     createdby=#{createdBy} ,
+					     create_time=CURRENT_TIMESTAMP(),
+					 </if>
+					 <if test="lastUpdatedBy !=null"> 
+					 	 last_updatedby=#{lastUpdatedBy} ,
+					 	 last_update_time=CURRENT_TIMESTAMP() ,
+					 </if>
+			    </set>
+	 		WHERE fund_id=#{fundId}	
+	</update>
+	<delete id="deleteFundInfo" parameterType="int">
+		DELETE FROM Fund_Info WHERE fund_id=#{fundId}
+	</delete>
+</mapper>  

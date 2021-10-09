@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.acbcwy.fund.dao.SystemLogDao"> 
+	<select id="findSystemLog" parameterType="com.acbcwy.fund.model.SystemLog" resultType="com.acbcwy.fund.model.SystemLog"> 
+		select  log_id as logId, 
+				user_id as userId,
+				log_time as logTime ,
+				content 
+		  from system_log  
+		 where 1=1
+		    <if test="logId !=null">
+			   and log_id=#{logId}
+		    </if>	
+		    <if test="userId !=null">
+			   and user_id=#{userId}
+		    </if>	
+		    <if test="logTime !=null">
+			   and log_time=#{logTime}
+		    </if>	
+		    <if test="content !=null">
+			   and content=#{content}
+		    </if>	
+	</select> 
+	
+	<insert id="addSystemLog" parameterType="com.acbcwy.fund.model.SystemLog" flushCache="true"> 
+			INSERT INTO system_log(
+			                 log_id,
+							 user_id ,
+				             log_time ,
+							 content
+						    ) 
+ 			     VALUES (#{logId},
+						 #{userId},
+						 CURRENT_TIMESTAMP(),
+						 #{content}
+						 ) 
+	</insert> 
+	<update id="updateSystemLog" parameterType="com.acbcwy.fund.model.SystemLog">
+			UPDATE system_log 
+		       <set> 
+		             <if test="userId !=null"> user_id=#{userId} ,</if>
+					 <if test="logTime !=null"> log_time=#{logTime} ,</if>
+					 <if test="content !=null"> content=#{content} ,</if>
+			    </set>
+	 		WHERE log_id=#{logId}	
+	</update>
+	<delete id="deleteSystemLog" parameterType="com.acbcwy.fund.model.SystemLog">
+		DELETE FROM system_log WHERE log_id=#{logId} 
+	</delete>
+</mapper>  

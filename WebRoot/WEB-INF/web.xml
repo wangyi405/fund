@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" 
+	xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+	<display-name></display-name>
+	
+	<!--加载ApplicationContext.xml文件  -->
+	<listener>
+		<listener-class>
+			org.springframework.web.context.ContextLoaderListener
+		</listener-class>
+	</listener> 
+	
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:ApplicationContext.xml</param-value> 
+	</context-param>
+	
+	<!-- 防止Spring内存溢出监听器  -->  
+	<listener>  
+	    <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>  
+	</listener>  
+	   	
+	<servlet>
+		<display-name>PC端用户操作管理服务</display-name>
+		<servlet-name>PcTerminalServlet</servlet-name>
+		<servlet-class>com.acbcwy.fund.servlet.PcTerminalServlet</servlet-class>
+	</servlet>
+	
+	
+	<servlet>
+		<description>手机端用户操作管理服务</description>
+		<display-name>手机端用户操作管理服务</display-name>
+		<servlet-name>PhTerminalServlet</servlet-name>
+		<servlet-class>com.acbcwy.fund.servlet.PhTerminalServlet</servlet-class>
+	</servlet>
+	
+	<!--负责文件上传-->
+	<servlet>
+	  <servlet-name>UploadServlet</servlet-name>
+	  <servlet-class>com.acbcwy.fund.servlet.UploadServlet</servlet-class>
+	</servlet>
+
+	
+	<servlet-mapping>
+		<servlet-name>PcTerminalServlet</servlet-name>
+		<url-pattern>/services/computer/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>PhTerminalServlet</servlet-name>
+		<url-pattern>/services/phone/*</url-pattern>
+	</servlet-mapping>
+	
+    <servlet-mapping>
+      <servlet-name>UploadServlet</servlet-name>
+      <url-pattern>/servlet/upload</url-pattern>
+    </servlet-mapping>	
+    
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+</web-app>

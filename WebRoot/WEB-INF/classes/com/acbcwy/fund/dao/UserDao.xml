@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.acbcwy.fund.dao.UserDao"> 
+	<select id="findUser" parameterType="com.acbcwy.fund.model.User" resultType="com.acbcwy.fund.model.User"> 
+		select  X.user_id as userId, 
+				X.user_name as userName,
+				X.id_card_no as idCardNo,
+				X.phone ,
+				X.email ,
+				X.user_type as userType ,
+				X.createdby ,
+				X.create_time as createTime,
+				X.last_updatedby as lastUpdatedBy,
+				X.last_update_time as lastUpdateTime,
+				(select Y.user_name from User Y where Y.user_id=X.createdby) as createdByName,
+				(select Z.user_name from User Z where Z.user_id=X.last_updatedby) as lastUpdatedByName,
+				ifNull(M.total_money,0) + IFNULL(z.buyTotalValue,0) - IFNULL(z.saleTotalValue,0) as totalMoney
+		  from User X
+		 left join (select user_id,max(account_day) as account_day
+						 from user_day_money  
+					  group by user_id
+		            ) Y on (X.user_id=Y.user_id)
+		 left join user_day_money M on(X.user_id=M.user_id and M.account_day=Y.account_day) 
+	    left join (  select  M.user_id,
+													sum(IF(M.invest_direction=1,M.invest_amount,0)) as buyTotalValue, 
+													sum(IF(M.invest_direction!=1,M.invest_amount,0)) as saleTotalValue 
+									from    invest_data M
+									where   M.invest_date > (select IFNULL(max(account_day),'1900-01-01') as account_day from fund_income )
+									group by user_id ) Z on (X.user_id=z.user_id)
+	
+		 where 1=1
+		    <if test="userId !=null">
+			   and X.user_id=#{userId}
+		    </if>	
+		    <if test="userName !=null and userName !=''">
+			   and X.user_name like #{userName}
+		    </if>	
+		    <if test="idCardNo !=null and idCardNo !=''">
+			   and X.id_card_no like #{idCardNo}
+		    </if>	
+		    <if test="password !=null and password !=''">
+			   and X.password=#{password}
+		    </if>		
+			<if test="phone !=null and phone !=''">
+			   and X.phone=#{phone}
+		    </if>	
+			<if test="email !=null and email !=''">
+			   and X.email=#{email}
+		    </if>	
+			<if test="userType !=null">
+			   and X.user_type=#{userType}
+		    </if>	
+		order by X.user_name    
+	</select> 
+	
+	<select id="findUserById" parameterType="com.acbcwy.fund.model.User" resultType="com.acbcwy.fund.model.User"> 
+		select  X.user_id as userId, 
+				X.user_name as userName,
+				X.id_card_no as idCardNo,
+				X.password ,
+				X.phone ,
+				X.email ,
+				X.user_type as userType ,
+				X.createdby ,
+				X.create_time as createTime,
+				X.last_updatedby as lastUpdatedBy,
+				X.last_update_time as lastUpdateTime,
+				(select Y.user_name from User Y where Y.user_id=X.createdby) as createdByName,
+				(select Z.user_name from User Z where Z.user_id=X.last_updatedby) as lastUpdatedByName,
+				M.total_money as totalMoney
+		  from User X
+		  left join user_day_money M on(X.user_id=M.user_id and M.account_day=current_date())
+		 where  X.user_id=#{userId} 
+	</select> 
+	
+	<insert id="addUser" parameterType="com.acbcwy.fund.model.User" flushCache="true"> 
+			INSERT INTO user(user_name,
+							 id_card_no,
+							 password,
+							 phone,
+							 email,
+							 user_type,
+							 createdby,
+							 create_time,
+							 last_updatedby,
+							 last_update_time
+						    ) 
+ 			     VALUES (#{userName},
+						 #{idCardNo},
+						 #{password},
+						 #{phone},
+						 #{email},
+						 #{userType},
+						 #{createdBy},
+						 CURRENT_TIMESTAMP(),
+						 #{lastUpdatedBy},
+						 CURRENT_TIMESTAMP()
+						 ) 
+	</insert> 
+	<update id="updateUser" parameterType="com.acbcwy.fund.model.User">
+			UPDATE User 
+		       <set> 
+		             <if test="userName !=null"> user_name=#{userName} ,</if>
+					 <if test="idCardNo !=null"> id_card_no=#{idCardNo} ,</if>
+					 <if test="password !=null"> password=#{password} ,</if>
+					 <if test="phone !=null"> phone=#{phone} ,</if>
+					 <if test="email !=null"> email=#{email} ,</if>
+					 <if test="userType !=null"> user_type=#{userType} ,</if>
+					 <if test="createdBy !=null"> 
+					     createdby=#{createdBy} ,
+					     create_time=CURRENT_TIMESTAMP(),
+					 </if>
+					 <if test="lastUpdatedBy !=null"> 
+					 	 last_updatedby=#{lastUpdatedBy} ,
+					 	 last_update_time=CURRENT_TIMESTAMP() ,
+					 </if>
+			    </set>
+	 		WHERE user_id=#{userId}	
+	</update>
+	<delete id="deleteUser" parameterType="int">
+		DELETE FROM user WHERE user_id=#{userId}
+	</delete>
+
+</mapper>  
