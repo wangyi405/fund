@@ -1,0 +1,29 @@
+
+
+
+
+
+-------------------------系统功能
+管理员：
+  用户查看
+  开户
+  买入
+  赎回
+  
+  净值录入
+  收益计算
+  日志查看
+  基金收益率查看（日、月、季度、年）
+
+投资用户
+  投资总额
+  基金收益率查看（日、月、季度、年）
+  
+    
+---------------------------------系统表结构
+用户信息：UserId、姓名、身份证号、密码、phone、email、用户类型、createdby、createdTime、lastupdateby、lastUpdateTime
+每日总资金：UserId、日期、资金总额
+投资记录：investId、UserId、日期、金额、投资方向(买入、卖出)、createdby、createdTime、lastupdateby、lastUpdateTime
+基金信息：fundId、基金名称、基金经理、createdby、createdTime、lastupdateby、lastUpdateTime
+净值收益：基金Id、日期、净收益率、今日净值、createdby、createdTime、lastupdateby、lastUpdateTime
+系统日志: id、content、userId、Time
